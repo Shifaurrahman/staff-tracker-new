@@ -20,6 +20,14 @@ export async function addStaff(name, colorIdx) {
   return data
 }
 
+export async function deleteStaff(staffId) {
+  const { error } = await supabase
+    .from('staff')
+    .delete()
+    .eq('id', staffId)
+  if (error) throw error
+}
+
 // ── Messages ───────────────────────────────────────────────────────────────
 export async function fetchMessages(weekStart, weekEnd) {
   const { data, error } = await supabase

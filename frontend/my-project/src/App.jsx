@@ -13,10 +13,10 @@ import MessageFeed   from './components/MessageFeed'
 export default function App() {
   const { identity, setIdentity, clearIdentity, loaded } = useIdentity()
 
-  const [staff,       setStaff]       = useState([])
-  const [messages,    setMessages]    = useState([])
-  const [weekOffset,  setWeekOffset]  = useState(0)
-  const [loading,     setLoading]     = useState(true)
+  const [staff,        setStaff]        = useState([])
+  const [messages,     setMessages]     = useState([])
+  const [weekOffset,   setWeekOffset]   = useState(0)
+  const [loading,      setLoading]      = useState(true)
   const [showAddStaff, setShowAddStaff] = useState(false)
   const feedRef = useRef(null)
 
@@ -62,7 +62,12 @@ export default function App() {
 
   function handleStaffAdded(newStaff) {
     setStaff(prev => [...prev, newStaff])
-    setShowAddStaff(false)
+  }
+
+  function handleStaffDeleted(staffId) {
+    setStaff(prev => prev.filter(s => s.id !== staffId))
+    // If the deleted member was somehow the current user, clear identity
+    if (identity?.id === staffId) clearIdentity()
   }
 
   // Loading state before localStorage resolves
@@ -133,6 +138,7 @@ export default function App() {
         <AddStaffModal
           existingStaff={staff}
           onAdded={handleStaffAdded}
+          onDeleted={handleStaffDeleted}
           onClose={() => setShowAddStaff(false)}
         />
       )}
@@ -146,7 +152,6 @@ function WeekStatsPanel({ messages, staff }) {
     <p className="text-xs text-gray-300 italic">No updates posted yet this week.</p>
   )
 
-  // Count messages per person
   const counts = {}
   messages.forEach(m => {
     counts[m.staff_name] = (counts[m.staff_name] || 0) + 1

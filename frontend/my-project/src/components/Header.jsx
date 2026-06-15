@@ -12,14 +12,14 @@ export default function Header({ identity, onSwitchIdentity, onAddStaff }) {
       </div>
 
       <div className="flex items-center gap-2">
-        {/* Admin: add staff button */}
+        {/* Team Lead: add staff button */}
         {identity.isAdmin && (
           <button
             onClick={onAddStaff}
             className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 transition-colors font-medium"
           >
             <span>+</span>
-            <span className="hidden sm:inline">Add Staff</span>
+            <span className="hidden sm:inline">Add Team Member</span>
           </button>
         )}
 
@@ -36,7 +36,7 @@ export default function Header({ identity, onSwitchIdentity, onAddStaff }) {
             {identity.name.charAt(0).toUpperCase()}
           </span>
           <span className="text-xs font-medium max-w-[80px] truncate">
-            {identity.isAdmin ? '🔐 Admin' : identity.name}
+            {identity.isAdmin ? '🔐 Team Lead' : identity.name}
           </span>
           <span className="text-white/40 text-[10px]">▾</span>
         </button>
