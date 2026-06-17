@@ -58,3 +58,10 @@ FROM messages m
 JOIN staff s ON s.id = m.staff_id
 LEFT JOIN replies r ON r.message_id = m.id
 ORDER BY m.created_at DESC;
+
+
+ALTER TABLE staff ADD COLUMN IF NOT EXISTS passcode TEXT;
+
+UPDATE staff
+SET passcode = LPAD(FLOOR(RANDOM() * 90000 + 10000)::TEXT, 5, '0')
+WHERE passcode IS NULL AND name != 'Team Lead';

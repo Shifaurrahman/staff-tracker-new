@@ -1,7 +1,7 @@
 import { formatDate, sameDay } from '../lib/helpers'
 import MessageCard from './MessageCard'
 
-export default function MessageFeed({ messages, isAdmin, loading, onReplied }) {
+export default function MessageFeed({ messages, isAdmin, currentStaffId, loading, onReplied, onDeleted }) {
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -25,7 +25,6 @@ export default function MessageFeed({ messages, isAdmin, loading, onReplied }) {
     )
   }
 
-  // Group by day — newest day first
   const groups = []
   let currentDay = null
   ;[...messages].reverse().forEach(msg => {
@@ -41,7 +40,6 @@ export default function MessageFeed({ messages, isAdmin, loading, onReplied }) {
     <div className="flex-1 overflow-y-auto">
       {groups.map(group => (
         <div key={group.dayKey} className="px-4 pt-4 pb-2">
-          {/* Day label */}
           <div className="flex items-center gap-3 mb-3">
             <div className="h-px flex-1 bg-gray-100" />
             <span className={`text-[11px] font-bold uppercase tracking-widest px-2 ${
@@ -52,14 +50,15 @@ export default function MessageFeed({ messages, isAdmin, loading, onReplied }) {
             <div className="h-px flex-1 bg-gray-100" />
           </div>
 
-          {/* Cards — reversed so latest is at bottom within the day */}
           <div className="space-y-2.5">
             {[...group.items].reverse().map(msg => (
               <MessageCard
                 key={msg.id}
                 msg={msg}
                 isAdmin={isAdmin}
+                currentStaffId={currentStaffId}
                 onReplied={onReplied}
+                onDeleted={onDeleted}
               />
             ))}
           </div>

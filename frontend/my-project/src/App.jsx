@@ -20,12 +20,10 @@ export default function App() {
   const [showAddStaff, setShowAddStaff] = useState(false)
   const feedRef = useRef(null)
 
-  // Load staff
   useEffect(() => {
     fetchStaff().then(setStaff).catch(console.error)
   }, [])
 
-  // Load messages for current week
   const loadMessages = useCallback(async () => {
     setLoading(true)
     try {
@@ -41,13 +39,11 @@ export default function App() {
 
   useEffect(() => { loadMessages() }, [loadMessages])
 
-  // Realtime subscription (refresh on any change)
   useEffect(() => {
     const unsub = subscribeToChanges(() => loadMessages())
     return unsub
   }, [loadMessages])
 
-  // Scroll to bottom when new messages arrive
   useEffect(() => {
     if (weekOffset === 0 && feedRef.current) {
       feedRef.current.scrollTop = feedRef.current.scrollHeight
@@ -66,11 +62,17 @@ export default function App() {
 
   function handleStaffDeleted(staffId) {
     setStaff(prev => prev.filter(s => s.id !== staffId))
-    // If the deleted member was somehow the current user, clear identity
     if (identity?.id === staffId) clearIdentity()
   }
 
-  // Loading state before localStorage resolves
+  function handleMessageDeleted(messageId) {
+    setMessages(prev => prev.filter(m => m.id !== messageId))
+  }
+
+  function handleStaffUpdated(updatedStaff) {
+    setStaff(prev => prev.map(s => s.id === updatedStaff.id ? updatedStaff : s))
+  }
+
   if (!loaded) {
     return (
       <div className="fixed inset-0 bg-navy flex items-center justify-center">
@@ -79,7 +81,6 @@ export default function App() {
     )
   }
 
-  // Name gate — force identity selection
   if (!identity) {
     return <IdentityGate staff={staff} onSelect={setIdentity} />
   }
@@ -92,10 +93,7 @@ export default function App() {
         onAddStaff={() => setShowAddStaff(true)}
       />
 
-      {/* Main content — desktop: side by side | mobile: stacked */}
       <div className="flex flex-1 overflow-hidden">
-
-        {/* Desktop left: compose panel */}
         <div className="hidden md:flex flex-col w-[380px] min-w-[320px] border-r border-gray-200 bg-white overflow-y-auto">
           <MessageInput
             identity={identity}
@@ -107,7 +105,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Right: feed */}
         <div className="flex-1 flex flex-col overflow-hidden">
           <WeekNav
             weekOffset={weekOffset}
@@ -115,7 +112,6 @@ export default function App() {
             count={messages.length}
           />
 
-          {/* Mobile: message input above feed */}
           <div className="md:hidden flex-shrink-0">
             <MessageInput
               identity={identity}
@@ -127,8 +123,10 @@ export default function App() {
             <MessageFeed
               messages={messages}
               isAdmin={identity.isAdmin}
+              currentStaffId={identity.id}
               loading={loading}
               onReplied={loadMessages}
+              onDeleted={handleMessageDeleted}
             />
           </div>
         </div>
@@ -139,6 +137,7 @@ export default function App() {
           existingStaff={staff}
           onAdded={handleStaffAdded}
           onDeleted={handleStaffDeleted}
+          onUpdated={handleStaffUpdated}
           onClose={() => setShowAddStaff(false)}
         />
       )}
@@ -146,7 +145,6 @@ export default function App() {
   )
 }
 
-// Week stats sidebar panel (desktop only)
 function WeekStatsPanel({ messages, staff }) {
   if (!messages.length) return (
     <p className="text-xs text-gray-300 italic">No updates posted yet this week.</p>
