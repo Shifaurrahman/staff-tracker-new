@@ -65,3 +65,33 @@ ALTER TABLE staff ADD COLUMN IF NOT EXISTS passcode TEXT;
 UPDATE staff
 SET passcode = LPAD(FLOOR(RANDOM() * 90000 + 10000)::TEXT, 5, '0')
 WHERE passcode IS NULL AND name != 'Team Lead';
+
+
+-- Projects table
+CREATE TABLE IF NOT EXISTS projects (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name        TEXT NOT NULL,
+  description TEXT NOT NULL DEFAULT '',
+  context_md  TEXT NOT NULL DEFAULT '',
+  status      TEXT NOT NULL DEFAULT 'active',
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Staff profiles table
+CREATE TABLE IF NOT EXISTS staff_profiles (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  staff_id   UUID NOT NULL REFERENCES staff(id) ON DELETE CASCADE UNIQUE,
+  bio_md     TEXT NOT NULL DEFAULT '',
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Staff ↔ Projects junction table
+CREATE TABLE IF NOT EXISTS staff_projects (
+  staff_id   UUID NOT NULL REFERENCES staff(id) ON DELETE CASCADE,
+  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  PRIMARY KEY (staff_id, project_id)
+);
+
+ALTER TABLE projects      DISABLE ROW LEVEL SECURITY;
+ALTER TABLE staff_profiles DISABLE ROW LEVEL SECURITY;
+ALTER TABLE staff_projects DISABLE ROW LEVEL SECURITY;
